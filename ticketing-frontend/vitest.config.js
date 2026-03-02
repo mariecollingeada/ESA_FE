@@ -11,7 +11,7 @@ export default defineConfig({
   plugins: [react()],
   test: {
     globals: true,
-    environment: 'jsdom',
+    environment: 'happy-dom',
     setupFiles: './src/test/setup.js',
     // <-- add these two lines:
     threads: false,                // run tests in-process (avoids worker require() issue)
