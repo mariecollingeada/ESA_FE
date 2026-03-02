@@ -17,6 +17,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Debug - repo layout (verify package.json location)
+        run: |
+          echo "PWD: $(pwd)"
+          echo "Listing working dir:"
+          ls -la
+          echo "Listing repo root:"
+          ls -la ..
+        # keep || true so debug doesn't fail the job if something odd occurs
+        shell: bash
+
       - name: Use Node.js 18
         uses: actions/setup-node@v4
         with:
