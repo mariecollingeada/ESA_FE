@@ -28,7 +28,7 @@ export default function Register() {
         <input placeholder="Username" required onChange={e => setForm({...form, username: e.target.value})} />
         <input placeholder="Email" required onChange={e => setForm({...form, email: e.target.value})} />
         <input type="password" placeholder="Password" required onChange={e => setForm({...form, password: e.target.value})} />
-        <input type="password" placeholder="Confirm Password" required onChange={e => setForm({...form, password2: e.target.value})} />
+        <input type="password" placeholder="Confirm Password" required onChange={e => setForm({...form, confirmPassword: e.target.value})} />
         <button type="submit">Register</button>
       </form>
     </div>
