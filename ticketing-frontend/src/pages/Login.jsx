@@ -1,6 +1,38 @@
 import { useState } from "react"
-import { loginUser, getMe } from "../api/auth"
+import { loginUser, getProfile } from "../api/auth"
 import { useNavigate } from "react-router-dom"
+
+const formatApiError = (err, context) => {
+  const status = err.response?.status
+  const data = err.response?.data
+  const details = typeof data === "string" ? data : data?.message || data?.error || JSON.stringify(data)
+
+  if (!err.response && err.message) {
+    return `${context}: ${err.message}`
+  }
+
+  if (!err.response) {
+    return `${context}: could not reach server`
+  }
+
+  return `${context}: ${status}${details ? ` - ${details}` : ""}`
+}
+
+const getTokenFromResponse = (payload) => {
+  return (
+    payload.accessToken ||
+    payload.access ||
+    payload.token ||
+    payload.jwt ||
+    payload.data?.accessToken ||
+    payload.data?.access ||
+    null
+  )
+}
+
+const getRefreshFromResponse = (payload) => {
+  return payload.refreshToken || payload.refresh || payload.data?.refreshToken || payload.data?.refresh || null
+}
 
 export default function Login() {
   const [form, setForm] = useState({})
@@ -13,17 +45,31 @@ export default function Login() {
 
     try {
       const res = await loginUser(form)
-      const { access, refresh } = res.data
+      const access = getTokenFromResponse(res.data)
+      const refresh = getRefreshFromResponse(res.data)
+
+      if (!access) {
+        throw new Error(`No access token returned from login. Response: ${JSON.stringify(res.data)}`)
+      }
 
       localStorage.setItem("access_token", access)
-      localStorage.setItem("refresh_token", refresh)
+      if (refresh) {
+        localStorage.setItem("refresh_token", refresh)
+      }
 
-      const me = await getMe()
+      let me
+      try {
+        me = await getProfile()
+      } catch (profileErr) {
+        setError(formatApiError(profileErr, "Profile request failed after successful login"))
+        return
+      }
+
       localStorage.setItem("me", JSON.stringify(me.data))
 
-      navigate("/tickets")
+      navigate("/profile")
     } catch (err) {
-      setError(err.response?.data || "Login failed")
+      setError(formatApiError(err, "Login failed"))
     }
   }
 

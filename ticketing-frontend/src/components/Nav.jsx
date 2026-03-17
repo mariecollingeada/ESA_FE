@@ -14,9 +14,9 @@ export default function Nav() {
   return (
     <nav className="nav">
       <Link to="/">Home</Link>
-      <Link to="/register">Register</Link>
-      <Link to="/login">Login</Link>
-      <Link to="/tickets">Tickets</Link>
+      {!loggedIn && <Link to="/register">Register</Link>}
+      {!loggedIn && <Link to="/login">Login</Link>}
+      {loggedIn && <Link to="/profile">Profile</Link>}
       {loggedIn && <button onClick={logout}>Logout</button>}
     </nav>
   )
