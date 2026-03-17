@@ -9,7 +9,7 @@ export default function App() {
       <Nav />
       <div className="container">
         <Routes>
-          <Route path="/" element={<h2>Welcome to Ticketing App</h2>} />
+          <Route path="/" element={<h2>ESE App</h2>} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           {/* <Route path="/tickets" element={<Tickets />} /> */}
