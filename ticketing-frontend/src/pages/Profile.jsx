@@ -4,6 +4,7 @@ import {
   deletePet,
   getMyPets,
   getPetById,
+  uploadPetImage,
   updatePet,
 } from "../api/pets"
 
@@ -63,9 +64,11 @@ export default function Profile() {
   const [selectedPet, setSelectedPet] = useState(null)
   const [createForm, setCreateForm] = useState(EMPTY_FORM)
   const [editForm, setEditForm] = useState(EMPTY_FORM)
+  const [imageFile, setImageFile] = useState(null)
   const [editingPet, setEditingPet] = useState(false)
   const [loadingPets, setLoadingPets] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [uploadingImage, setUploadingImage] = useState(false)
   const [error, setError] = useState(null)
   const [message, setMessage] = useState(null)
 
@@ -137,14 +140,17 @@ export default function Profile() {
   const handleSelectPet = async (pet) => {
     const id = getPetId(pet)
 
+    // Show the clicked pet immediately to avoid displaying stale details from the previous selection.
+    setSelectedPet(pet)
+
     if (!id) {
-      setSelectedPet(pet)
       return
     }
 
     setError(null)
     setMessage(null)
     setEditingPet(false)
+    setImageFile(null)
 
     try {
       const res = await getPetById(id)
@@ -230,6 +236,59 @@ export default function Profile() {
       setError(formatApiError(err, "Failed to delete pet"))
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  const handleImageSelected = (e) => {
+    const file = e.target.files?.[0] || null
+    if (!file) {
+      setImageFile(null)
+      return
+    }
+
+    if (!file.type.startsWith("image/")) {
+      setError("Please select a valid image file")
+      setImageFile(null)
+      return
+    }
+
+    const maxBytes = 5 * 1024 * 1024
+    if (file.size > maxBytes) {
+      setError("Image must be 5MB or smaller")
+      setImageFile(null)
+      return
+    }
+
+    setError(null)
+    setImageFile(file)
+  }
+
+  const handleUploadImage = async () => {
+    const id = getPetId(selectedPet)
+    if (!id) {
+      setError("Selected pet has no id and cannot be updated")
+      return
+    }
+
+    if (!imageFile) {
+      setError("Please select an image first")
+      return
+    }
+
+    setUploadingImage(true)
+    setError(null)
+    setMessage(null)
+
+    try {
+      const res = await uploadPetImage(id, imageFile)
+      setSelectedPet(res.data || selectedPet)
+      setMessage("Pet image updated successfully")
+      setImageFile(null)
+      await loadMyPets()
+    } catch (err) {
+      setError(formatApiError(err, "Failed to upload pet image"))
+    } finally {
+      setUploadingImage(false)
     }
   }
 
@@ -347,9 +406,17 @@ export default function Profile() {
                     className="pet-card pet-card-btn"
                     onClick={() => handleSelectPet(pet)}
                   >
-                    <div className="pet-avatar" aria-hidden="true">
-                      <span>{name.charAt(0).toUpperCase()}</span>
-                    </div>
+                    {pet.imageUrl ? (
+                      <img
+                        className="pet-image"
+                        src={pet.imageUrl}
+                        alt={`${name} profile`}
+                      />
+                    ) : (
+                      <div className="pet-avatar" aria-hidden="true">
+                        <span>{name.charAt(0).toUpperCase()}</span>
+                      </div>
+                    )}
                     <h4>{name}</h4>
                   </button>
                 )
@@ -362,6 +429,17 @@ export default function Profile() {
               <h3>Pet Profile</h3>
               {!editingPet ? (
                 <>
+                  {selectedPet.imageUrl ? (
+                    <img
+                      className="pet-image pet-image-large"
+                      src={selectedPet.imageUrl}
+                      alt={`${selectedPet.name || "Pet"} profile`}
+                    />
+                  ) : (
+                    <div className="pet-avatar" aria-hidden="true">
+                      <span>{(selectedPet.name || "P").charAt(0).toUpperCase()}</span>
+                    </div>
+                  )}
                   <p>
                     <strong>Name:</strong> {selectedPet.name || "-"}
                   </p>
@@ -379,17 +457,32 @@ export default function Profile() {
                     <strong>Description:</strong>{" "}
                     {selectedPet.description || selectedPet.notes || "-"}
                   </p>
+                  <div className="upload-row">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageSelected}
+                      disabled={uploadingImage || submitting}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleUploadImage}
+                      disabled={uploadingImage || submitting || !imageFile}
+                    >
+                      {uploadingImage ? "Uploading..." : "Upload Image"}
+                    </button>
+                  </div>
                   <button
                     type="button"
                     onClick={handleStartEdit}
-                    disabled={submitting}
+                    disabled={submitting || uploadingImage}
                   >
                     Edit Pet
                   </button>{" "}
                   <button
                     type="button"
                     onClick={handleDeletePet}
-                    disabled={submitting}
+                    disabled={submitting || uploadingImage}
                   >
                     {submitting ? "Deleting..." : "Delete Pet"}
                   </button>

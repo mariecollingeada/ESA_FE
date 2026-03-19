@@ -17,7 +17,6 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          {/* <Route path="/tickets" element={<Tickets />} /> */}
         </Routes>
       </div>
     </>
