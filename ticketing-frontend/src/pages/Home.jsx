@@ -98,9 +98,17 @@ export default function Home() {
                   key={id || `${label}-${pet.species || "x"}`}
                   onClick={() => handleSelectPet(pet)}
                 >
-                  <div className="pet-avatar" aria-hidden="true">
-                    <span>{label.charAt(0).toUpperCase()}</span>
-                  </div>
+                  {pet.imageUrl ? (
+                    <img
+                      className="pet-image"
+                      src={pet.imageUrl}
+                      alt={`${label} profile`}
+                    />
+                  ) : (
+                    <div className="pet-avatar" aria-hidden="true">
+                      <span>{label.charAt(0).toUpperCase()}</span>
+                    </div>
+                  )}
                   <h3>{label}</h3>
                 </button>
               )
@@ -108,9 +116,13 @@ export default function Home() {
 
             return (
               <article className="pet-card" key={id || `${label}-${pet.species || "x"}`}>
-                <div className="pet-avatar" aria-hidden="true">
-                  <span>{label.charAt(0).toUpperCase()}</span>
-                </div>
+                {pet.imageUrl ? (
+                  <img className="pet-image" src={pet.imageUrl} alt={`${label} profile`} />
+                ) : (
+                  <div className="pet-avatar" aria-hidden="true">
+                    <span>{label.charAt(0).toUpperCase()}</span>
+                  </div>
+                )}
                 <h3>{label}</h3>
               </article>
             )
@@ -125,6 +137,17 @@ export default function Home() {
             <p>Loading pet details...</p>
           ) : (
             <>
+              {selectedPet.imageUrl ? (
+                <img
+                  className="pet-image pet-image-large"
+                  src={selectedPet.imageUrl}
+                  alt={`${selectedPet.name || "Pet"} profile`}
+                />
+              ) : (
+                <div className="pet-avatar" aria-hidden="true">
+                  <span>{(selectedPet.name || "P").charAt(0).toUpperCase()}</span>
+                </div>
+              )}
               <p>
                 <strong>Name:</strong> {selectedPet.name || "-"}
               </p>

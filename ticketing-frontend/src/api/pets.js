@@ -6,3 +6,8 @@ export const getMyPets = () => api.get("/api/pets/my-pets")
 export const createPet = (data) => api.post("/api/pets/create", data)
 export const updatePet = (id, data) => api.put(`/api/pets/${id}`, data)
 export const deletePet = (id) => api.delete(`/api/pets/${id}`)
+export const uploadPetImage = (id, file) => {
+	const formData = new FormData()
+	formData.append("file", file)
+	return api.post(`/api/pets/${id}/image`, formData)
+}
