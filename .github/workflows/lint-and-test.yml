@@ -27,6 +27,8 @@ jobs:
         # keep || true so debug doesn't fail the job if something odd occurs
         shell: bash
 
+      - name: Use Node.js 18
+
       - name: Use Node.js 20
         uses: actions/setup-node@v4
         with:
