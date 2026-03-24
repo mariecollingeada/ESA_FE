@@ -341,40 +341,50 @@ export default function Profile() {
         <section>
           <h3>Add Pet</h3>
           <form onSubmit={handleAddPet}>
+            <label htmlFor="profile-create-pet-name">Name</label>
             <input
-              placeholder="Name"
+              id="profile-create-pet-name"
+              name="Name"
               required
               value={createForm.name}
               onChange={(e) =>
                 setCreateForm({ ...createForm, name: e.target.value })
               }
             />
+            <label htmlFor="profile-create-pet-species">Species</label>
             <input
-              placeholder="Species"
+              id="profile-create-pet-species"
+              name="Species"
               required
               value={createForm.species}
               onChange={(e) =>
                 setCreateForm({ ...createForm, species: e.target.value })
               }
             />
+            <label htmlFor="profile-create-pet-breed">Breed</label>
             <input
-              placeholder="Breed"
+              id="profile-create-pet-breed"
+              name="Breed"
               value={createForm.breed}
               onChange={(e) =>
                 setCreateForm({ ...createForm, breed: e.target.value })
               }
             />
+            <label htmlFor="profile-create-pet-age">Age</label>
             <input
+              id="profile-create-pet-age"
               type="number"
+              name="Age"
               min="0"
-              placeholder="Age"
               value={createForm.age}
               onChange={(e) =>
                 setCreateForm({ ...createForm, age: e.target.value })
               }
             />
+            <label htmlFor="profile-create-pet-description">Description</label>
             <textarea
-              placeholder="Description"
+              id="profile-create-pet-description"
+              name="Description"
               rows={3}
               value={createForm.description}
               onChange={(e) =>
@@ -486,7 +496,9 @@ export default function Profile() {
                 </>
               ) : (
                 <form onSubmit={handleUpdatePet}>
+                  <label htmlFor="profile-edit-pet-name">Name</label>
                   <input
+                    id="profile-edit-pet-name"
                     placeholder="Name"
                     required
                     value={editForm.name}
@@ -494,7 +506,9 @@ export default function Profile() {
                       setEditForm({ ...editForm, name: e.target.value })
                     }
                   />
+                  <label htmlFor="profile-edit-pet-species">Species</label>
                   <input
+                    id="profile-edit-pet-species"
                     placeholder="Species"
                     required
                     value={editForm.species}
@@ -502,14 +516,18 @@ export default function Profile() {
                       setEditForm({ ...editForm, species: e.target.value })
                     }
                   />
+                  <label htmlFor="profile-edit-pet-breed">Breed</label>
                   <input
+                    id="profile-edit-pet-breed"
                     placeholder="Breed"
                     value={editForm.breed}
                     onChange={(e) =>
                       setEditForm({ ...editForm, breed: e.target.value })
                     }
                   />
+                  <label htmlFor="profile-edit-pet-age">Age</label>
                   <input
+                    id="profile-edit-pet-age"
                     type="number"
                     min="0"
                     placeholder="Age"
@@ -518,7 +536,9 @@ export default function Profile() {
                       setEditForm({ ...editForm, age: e.target.value })
                     }
                   />
+                  <label htmlFor="profile-edit-pet-description">Description</label>
                   <textarea
+                    id="profile-edit-pet-description"
                     placeholder="Description"
                     rows={3}
                     value={editForm.description}

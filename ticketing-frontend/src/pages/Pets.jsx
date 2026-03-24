@@ -194,40 +194,50 @@ export default function Pets() {
       <section>
         <h3>Create Pet</h3>
         <form onSubmit={handleCreate}>
+          <label htmlFor="create-pet-name">Name</label>
           <input
-            placeholder="Name"
+            id="create-pet-name"
+            name="name"
             required
             value={createForm.name}
             onChange={(e) =>
               setCreateForm({ ...createForm, name: e.target.value })
             }
           />
+          <label htmlFor="create-pet-species">Species</label>
           <input
-            placeholder="Species"
+            id="create-pet-species"
+            name="species"
             required
             value={createForm.species}
             onChange={(e) =>
               setCreateForm({ ...createForm, species: e.target.value })
             }
           />
+          <label htmlFor="create-pet-breed">Breed</label>
           <input
-            placeholder="Breed"
+            id="create-pet-breed"
+            name="breed"
             value={createForm.breed}
             onChange={(e) =>
               setCreateForm({ ...createForm, breed: e.target.value })
             }
           />
+          <label htmlFor="create-pet-age">Age</label>
           <input
+            id="create-pet-age"
             type="number"
+            name="age"
             min="0"
-            placeholder="Age"
             value={createForm.age}
             onChange={(e) =>
               setCreateForm({ ...createForm, age: e.target.value })
             }
           />
+          <label htmlFor="create-pet-description">Description</label>
           <textarea
-            placeholder="Description"
+            id="create-pet-description"
+            name="description"
             rows={3}
             value={createForm.description}
             onChange={(e) =>
@@ -244,34 +254,44 @@ export default function Pets() {
         <section>
           <h3>Edit Pet #{editingPetId}</h3>
           <form onSubmit={handleUpdate}>
+            <label htmlFor="edit-pet-name">Name</label>
             <input
-              placeholder="Name"
+              id="edit-pet-name"
+              name="name"
               required
               value={editForm.name}
               onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
             />
+            <label htmlFor="edit-pet-species">Species</label>
             <input
-              placeholder="Species"
+              id="edit-pet-species"
+              name="species"
               required
               value={editForm.species}
               onChange={(e) =>
                 setEditForm({ ...editForm, species: e.target.value })
               }
             />
+            <label htmlFor="edit-pet-breed">Breed</label>
             <input
-              placeholder="Breed"
+              id="edit-pet-breed"
+              name="breed"
               value={editForm.breed}
               onChange={(e) => setEditForm({ ...editForm, breed: e.target.value })}
             />
+            <label htmlFor="edit-pet-age">Age</label>
             <input
+              id="edit-pet-age"
               type="number"
+              name="age"
               min="0"
-              placeholder="Age"
               value={editForm.age}
               onChange={(e) => setEditForm({ ...editForm, age: e.target.value })}
             />
+            <label htmlFor="edit-pet-description">Description</label>
             <textarea
-              placeholder="Description"
+              id="edit-pet-description"
+              name="description"
               rows={3}
               value={editForm.description}
               onChange={(e) =>

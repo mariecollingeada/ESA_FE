@@ -81,14 +81,18 @@ export default function ResetPassword() {
       {error && <pre className="error">{JSON.stringify(error, null, 2)}</pre>}
 
       <form onSubmit={handleSubmit}>
+        <label htmlFor="reset-password">New password</label>
         <input
+          id="reset-password"
           type="password"
           placeholder="New password"
           value={form.password}
           onChange={(e) => setForm({ ...form, password: e.target.value })}
           required
         />
+        <label htmlFor="reset-confirm-password">Confirm new password</label>
         <input
+          id="reset-confirm-password"
           type="password"
           placeholder="Confirm new password"
           value={form.confirmPassword}

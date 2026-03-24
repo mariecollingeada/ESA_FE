@@ -13,6 +13,8 @@ export default defineConfig({
     globals: true,
     environment: 'happy-dom',
     setupFiles: './src/test/setup.js',
+    include: ['src/**/*.{test,spec}.{js,jsx,ts,tsx}'],
+    exclude: ['test/**', 'node_modules/**'],
     threads: false,
     deps: {
       inline: [

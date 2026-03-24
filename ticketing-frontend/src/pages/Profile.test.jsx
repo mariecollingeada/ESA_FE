@@ -19,6 +19,12 @@ vi.mock("../api/pets", () => ({
 }))
 
 describe("Profile page", () => {
+  const getInputByName = (name) => {
+    const el = document.querySelector(`input[name="${name}"]`)
+    expect(el).toBeTruthy()
+    return el
+  }
+
   beforeEach(() => {
     vi.clearAllMocks()
     localStorage.clear()
@@ -50,10 +56,10 @@ describe("Profile page", () => {
 
     expect(await screen.findByText("Kiki")).toBeInTheDocument()
 
-    fireEvent.change(screen.getByPlaceholderText("Name"), {
+    fireEvent.change(getInputByName("Name"), {
       target: { value: "Rex" },
     })
-    fireEvent.change(screen.getByPlaceholderText("Species"), {
+    fireEvent.change(getInputByName("Species"), {
       target: { value: "Dog" },
     })
     fireEvent.click(screen.getByRole("button", { name: "Add Pet" }))
@@ -190,10 +196,10 @@ describe("Profile page", () => {
     render(<Profile />)
 
     fireEvent.click(screen.getByRole("tab", { name: "My Pets" }))
-    fireEvent.change(screen.getByPlaceholderText("Name"), {
+    fireEvent.change(getInputByName("Name"), {
       target: { value: "Bobby" },
     })
-    fireEvent.change(screen.getByPlaceholderText("Species"), {
+    fireEvent.change(getInputByName("Species"), {
       target: { value: "Dog" },
     })
     fireEvent.click(screen.getByRole("button", { name: "Add Pet" }))
@@ -237,7 +243,7 @@ describe("Profile page", () => {
     fireEvent.click(await screen.findByRole("button", { name: /Mochi/i }))
     fireEvent.click(await screen.findByRole("button", { name: "Edit Pet" }))
 
-    fireEvent.change(screen.getAllByPlaceholderText("Breed")[1], {
+    fireEvent.change(screen.getByPlaceholderText("Breed"), {
       target: { value: "British" },
     })
     fireEvent.click(screen.getByRole("button", { name: "Save Changes" }))
