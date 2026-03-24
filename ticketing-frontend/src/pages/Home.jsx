@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useState } from "react"
-import { getAllPets, getPetById } from "../api/pets"
+import {
+  addPetToFavorites,
+  getAllPets,
+  getPetById,
+  removePetFromFavorites,
+} from "../api/pets"
 
 const formatApiError = (err, context) => {
   const status = err.response?.status
@@ -21,6 +26,19 @@ const formatApiError = (err, context) => {
 }
 
 const getPetId = (pet) => pet.id ?? pet.petId ?? pet._id
+const isFavorited = (pet) => pet?.isFavorited === true
+
+const getFavoriteCount = (pet) => {
+  const raw =
+    pet?.favoriteCount ??
+    pet?.favoritesCount ??
+    pet?.favouriteCount ??
+    pet?.favouritesCount ??
+    0
+
+  const num = Number(raw)
+  return Number.isFinite(num) ? num : 0
+}
 
 const getCreatedTimestamp = (pet) => {
   const candidate =
@@ -75,6 +93,7 @@ export default function Home() {
   const [pets, setPets] = useState([])
   const [selectedPet, setSelectedPet] = useState(null)
   const [activeSpecies, setActiveSpecies] = useState("All")
+  const [favoritesOnly, setFavoritesOnly] = useState(false)
   const [sortOrder, setSortOrder] = useState("newest")
   const [loading, setLoading] = useState(true)
   const [loadingPetDetail, setLoadingPetDetail] = useState(false)
@@ -94,12 +113,32 @@ export default function Home() {
   }, [pets])
 
   const filteredPets = useMemo(() => {
-    if (activeSpecies === "All") {
-      return pets
+    let filtered = pets
+
+    if (activeSpecies !== "All") {
+      filtered = filtered.filter((pet) => (pet.species || "") === activeSpecies)
     }
 
-    return pets.filter((pet) => (pet.species || "") === activeSpecies)
-  }, [pets, activeSpecies])
+    if (favoritesOnly && loggedIn) {
+      filtered = filtered.filter((pet) => isFavorited(pet))
+    }
+
+    return filtered
+  }, [pets, activeSpecies, favoritesOnly, loggedIn])
+
+  const topFavoritedPets = useMemo(() => {
+    return [...pets]
+      .sort((a, b) => {
+        const countDiff = getFavoriteCount(b) - getFavoriteCount(a)
+        if (countDiff !== 0) {
+          return countDiff
+        }
+        const aName = (a.name || "").toLowerCase()
+        const bName = (b.name || "").toLowerCase()
+        return aName.localeCompare(bName)
+      })
+      .slice(0, 3)
+  }, [pets])
 
   const visiblePets = useMemo(() => {
     const sorted = [...filteredPets]
@@ -169,6 +208,93 @@ export default function Home() {
     }
   }
 
+  const handleToggleFavorite = async (e, pet) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    if (!loggedIn) {
+      return
+    }
+
+    const id = getPetId(pet)
+    if (!id) {
+      setError("Selected pet has no id and cannot be favorited")
+      return
+    }
+
+    const currentlyFavorited = isFavorited(pet)
+
+    setError(null)
+    setPets((prev) =>
+      prev.map((item) => {
+        const itemId = getPetId(item)
+        if (itemId !== id) {
+          return item
+        }
+        return {
+          ...item,
+          isFavorited: !currentlyFavorited,
+          favoriteCount: Math.max(
+            0,
+            getFavoriteCount(item) + (currentlyFavorited ? -1 : 1),
+          ),
+        }
+      }),
+    )
+    setSelectedPet((prev) => {
+      if (!prev || getPetId(prev) !== id) {
+        return prev
+      }
+      return {
+        ...prev,
+        isFavorited: !currentlyFavorited,
+        favoriteCount: Math.max(
+          0,
+          getFavoriteCount(prev) + (currentlyFavorited ? -1 : 1),
+        ),
+      }
+    })
+
+    try {
+      if (currentlyFavorited) {
+        await removePetFromFavorites(id)
+      } else {
+        await addPetToFavorites(id)
+      }
+    } catch (err) {
+      setPets((prev) =>
+        prev.map((item) => {
+          const itemId = getPetId(item)
+          if (itemId !== id) {
+            return item
+          }
+          return {
+            ...item,
+            isFavorited: currentlyFavorited,
+            favoriteCount: Math.max(
+              0,
+              getFavoriteCount(item) + (currentlyFavorited ? 0 : -1),
+            ),
+          }
+        }),
+      )
+      setSelectedPet((prev) => {
+        if (!prev || getPetId(prev) !== id) {
+          return prev
+        }
+        return {
+          ...prev,
+          isFavorited: currentlyFavorited,
+          favoriteCount: Math.max(
+            0,
+            getFavoriteCount(prev) + (currentlyFavorited ? 0 : -1),
+          ),
+        }
+      })
+      setError(formatApiError(err, "Failed to update favorite"))
+    }
+  }
+
   return (
     <div>
       <h2>Pets</h2>
@@ -191,6 +317,16 @@ export default function Home() {
             ))}
           </div>
           <div className="sort-row">
+            {loggedIn && (
+              <button
+                type="button"
+                className={favoritesOnly ? "filter-tag active" : "filter-tag"}
+                onClick={() => setFavoritesOnly((prev) => !prev)}
+                aria-pressed={favoritesOnly}
+              >
+                My Favourites
+              </button>
+            )}
             <label htmlFor="home-sort-order">Sort</label>
             <select
               id="home-sort-order"
@@ -202,6 +338,23 @@ export default function Home() {
             </select>
           </div>
         </div>
+      )}
+
+      {!loading && pets.length > 0 && (
+        <section className="top-favorites-section">
+          <h3>Most Favourited</h3>
+          <ol>
+            {topFavoritedPets.map((pet) => {
+              const id = getPetId(pet)
+              const label = pet.name || "Unnamed"
+              return (
+                <li key={`top-${id || label}`}>
+                  <strong>{label}</strong> <span>({getFavoriteCount(pet)} favorites)</span>
+                </li>
+              )
+            })}
+          </ol>
+        </section>
       )}
 
       {loading ? (
@@ -216,25 +369,34 @@ export default function Home() {
 
             if (loggedIn) {
               return (
-                <button
-                  type="button"
-                  className="pet-card pet-card-btn"
-                  key={id || `${label}-${pet.species || "x"}`}
-                  onClick={() => handleSelectPet(pet)}
-                >
-                  {pet.imageUrl ? (
-                    <img
-                      className="pet-image"
-                      src={pet.imageUrl}
-                      alt={`${label} profile`}
-                    />
-                  ) : (
-                    <div className="pet-avatar" aria-hidden="true">
-                      <span>{label.charAt(0).toUpperCase()}</span>
-                    </div>
-                  )}
-                  <h3>{label}</h3>
-                </button>
+                <article className="pet-card" key={id || `${label}-${pet.species || "x"}`}>
+                  <button
+                    type="button"
+                    className={isFavorited(pet) ? "favorite-btn active" : "favorite-btn"}
+                    aria-label={isFavorited(pet) ? "Remove from favorites" : "Add to favorites"}
+                    onClick={(e) => handleToggleFavorite(e, pet)}
+                  >
+                    {isFavorited(pet) ? "♥" : "♡"}
+                  </button>
+                  <button
+                    type="button"
+                    className="pet-card-btn pet-card-link"
+                    onClick={() => handleSelectPet(pet)}
+                  >
+                    {pet.imageUrl ? (
+                      <img
+                        className="pet-image"
+                        src={pet.imageUrl}
+                        alt={`${label} profile`}
+                      />
+                    ) : (
+                      <div className="pet-avatar" aria-hidden="true">
+                        <span>{label.charAt(0).toUpperCase()}</span>
+                      </div>
+                    )}
+                    <h3>{label}</h3>
+                  </button>
+                </article>
               )
             }
 
