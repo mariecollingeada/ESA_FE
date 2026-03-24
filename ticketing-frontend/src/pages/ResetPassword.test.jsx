@@ -96,4 +96,67 @@ describe("ResetPassword page", () => {
 
     expect(screen.getByText(/Password reset successful/i)).toBeInTheDocument()
   })
+
+  it("supports alternate reset query param names", async () => {
+    mockResetPassword.mockResolvedValue({})
+
+    renderPage("/reset-password?resetToken=xyz&user=marie")
+
+    fireEvent.change(screen.getByPlaceholderText("New password"), {
+      target: { value: "Pass1234" },
+    })
+    fireEvent.change(screen.getByPlaceholderText("Confirm new password"), {
+      target: { value: "Pass1234" },
+    })
+    fireEvent.click(screen.getByRole("button", { name: "Reset Password" }))
+
+    await waitFor(() => {
+      expect(mockResetPassword).toHaveBeenCalledWith({
+        token: "xyz",
+        email: undefined,
+        username: "marie",
+        newPassword: "Pass1234",
+        confirmPassword: "Pass1234",
+      })
+    })
+  })
+
+  it("shows formatted API error message", async () => {
+    mockResetPassword.mockRejectedValue({
+      response: { status: 500, data: "Server error" },
+    })
+
+    renderPage("/reset-password?token=abc")
+
+    fireEvent.change(screen.getByPlaceholderText("New password"), {
+      target: { value: "Pass1234" },
+    })
+    fireEvent.change(screen.getByPlaceholderText("Confirm new password"), {
+      target: { value: "Pass1234" },
+    })
+    fireEvent.click(screen.getByRole("button", { name: "Reset Password" }))
+
+    expect(await screen.findByText(/Reset password failed: 500 - Server error/i)).toBeInTheDocument()
+  })
+
+  it("navigates to login after successful reset delay", async () => {
+    mockResetPassword.mockResolvedValue({})
+
+    renderPage("/reset-password?token=abc")
+
+    fireEvent.change(screen.getByPlaceholderText("New password"), {
+      target: { value: "Pass1234" },
+    })
+    fireEvent.change(screen.getByPlaceholderText("Confirm new password"), {
+      target: { value: "Pass1234" },
+    })
+    fireEvent.click(screen.getByRole("button", { name: "Reset Password" }))
+
+    await waitFor(() => {
+      expect(mockResetPassword).toHaveBeenCalled()
+    })
+
+    await new Promise((resolve) => setTimeout(resolve, 900))
+    expect(mockNavigate).toHaveBeenCalledWith("/login")
+  })
 })

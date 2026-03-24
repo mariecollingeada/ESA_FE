@@ -13,8 +13,7 @@ export default defineConfig({
     globals: true,
     environment: 'happy-dom',
     setupFiles: './src/test/setup.js',
-    // <-- add these two lines:
-    threads: false,                // run tests in-process (avoids worker require() issue)
+    threads: false,
     deps: {
       inline: [
         'html-encoding-sniffer',
@@ -22,11 +21,19 @@ export default defineConfig({
       ]
     },
     coverage: {
+      provider: 'v8',
       reporter: ['text', 'json', 'html'],
+      include: ['src/**/*.{js,jsx}'],
       exclude: [
         'node_modules/',
         'src/test/',
-      ]
+      ],
+      thresholds: {
+        lines: 60,
+        functions: 60,
+        branches: 50,
+        statements: 60,
+      },
     }
   },
   resolve: {

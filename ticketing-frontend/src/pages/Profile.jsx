@@ -330,9 +330,6 @@ export default function Profile() {
               <p>
                 <strong>Email:</strong> {me.email || "-"}
               </p>
-              <p>
-                <strong>Role:</strong> {me.role || "-"}
-              </p>
             </div>
           ) : (
             <p>No profile data found. Please log in again.</p>
