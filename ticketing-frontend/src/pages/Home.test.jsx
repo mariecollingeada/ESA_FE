@@ -84,6 +84,82 @@ describe("Home page", () => {
     expect(await screen.findByText("No pets available.")).toBeInTheDocument()
   })
 
+  it("filters pet cards by selected species tag", async () => {
+    mockGetAllPets.mockResolvedValue({
+      data: [
+        { id: 1, name: "Kiki", species: "Cat", breed: "Siamese" },
+        { id: 2, name: "Rex", species: "Dog", breed: "Labrador" },
+      ],
+    })
+
+    render(<Home />)
+
+    expect(await screen.findByText("Kiki")).toBeInTheDocument()
+    expect(screen.getByText("Rex")).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole("button", { name: "Cat" }))
+
+    expect(screen.getByText("Kiki")).toBeInTheDocument()
+    expect(screen.queryByText("Rex")).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole("button", { name: "All" }))
+
+    expect(screen.getByText("Rex")).toBeInTheDocument()
+  })
+
+  it("sorts pets by created date with newest first", async () => {
+    mockGetAllPets.mockResolvedValue({
+      data: [
+        { id: 1, name: "Older", species: "Cat", createdAt: "2025-01-01T00:00:00Z" },
+        { id: 2, name: "Newer", species: "Dog", createdAt: "2025-03-01T00:00:00Z" },
+      ],
+    })
+
+    render(<Home />)
+
+    await screen.findByText("Older")
+
+    const cards = document.querySelectorAll(".pet-card h3")
+    expect(cards[0]?.textContent).toBe("Newer")
+    expect(cards[1]?.textContent).toBe("Older")
+
+    fireEvent.change(screen.getByLabelText("Sort"), {
+      target: { value: "oldest" },
+    })
+
+    const sortedCards = document.querySelectorAll(".pet-card h3")
+    expect(sortedCards[0]?.textContent).toBe("Older")
+    expect(sortedCards[1]?.textContent).toBe("Newer")
+  })
+
+  it("still reorders when created date is missing by falling back to id", async () => {
+    mockGetAllPets.mockResolvedValue({
+      data: [
+        { id: 1, name: "Alpha", species: "Cat" },
+        { id: 3, name: "Gamma", species: "Dog" },
+        { id: 2, name: "Beta", species: "Dog" },
+      ],
+    })
+
+    render(<Home />)
+
+    await screen.findByText("Alpha")
+
+    const cards = document.querySelectorAll(".pet-card h3")
+    expect(cards[0]?.textContent).toBe("Gamma")
+    expect(cards[1]?.textContent).toBe("Beta")
+    expect(cards[2]?.textContent).toBe("Alpha")
+
+    fireEvent.change(screen.getByLabelText("Sort"), {
+      target: { value: "oldest" },
+    })
+
+    const oldestFirstCards = document.querySelectorAll(".pet-card h3")
+    expect(oldestFirstCards[0]?.textContent).toBe("Alpha")
+    expect(oldestFirstCards[1]?.textContent).toBe("Beta")
+    expect(oldestFirstCards[2]?.textContent).toBe("Gamma")
+  })
+
   it("falls back to clicked pet when detail fetch fails", async () => {
     localStorage.setItem("access_token", "token")
     mockGetAllPets.mockResolvedValue({
