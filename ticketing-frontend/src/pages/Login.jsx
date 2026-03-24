@@ -100,8 +100,21 @@ export default function Login() {
       {message && <p>{message}</p>}
       {error && <pre className="error">{JSON.stringify(error, null, 2)}</pre>}
       <form onSubmit={handleSubmit}>
-        <input placeholder="Username" required onChange={e => setForm({...form, username: e.target.value})} />
-        <input type="password" placeholder="Password" required onChange={e => setForm({...form, password: e.target.value})} />
+        <label htmlFor="login-username">Username</label>
+        <input
+          id="login-username"
+          name="username"
+          required
+          onChange={e => setForm({...form, username: e.target.value})}
+        />
+        <label htmlFor="login-password">Password</label>
+        <input
+          id="login-password"
+          type="password"
+          name="password"
+          required
+          onChange={e => setForm({...form, password: e.target.value})}
+        />
         <button type="submit">Login</button>
       </form>
       <p>

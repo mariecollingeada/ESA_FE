@@ -17,6 +17,12 @@ vi.mock("../api/pets", () => ({
 }))
 
 describe("Pets page", () => {
+  const getInputByName = (name) => {
+    const el = document.querySelector(`input[name="${name}"]`)
+    expect(el).toBeTruthy()
+    return el
+  }
+
   beforeEach(() => {
     vi.clearAllMocks()
     globalThis.confirm = vi.fn(() => true)
@@ -41,10 +47,10 @@ describe("Pets page", () => {
 
     render(<Pets />)
 
-    fireEvent.change(screen.getByPlaceholderText("Name"), {
+    fireEvent.change(getInputByName("name"), {
       target: { value: "Rex" },
     })
-    fireEvent.change(screen.getByPlaceholderText("Species"), {
+    fireEvent.change(getInputByName("species"), {
       target: { value: "Dog" },
     })
     fireEvent.click(screen.getByRole("button", { name: "Create" }))

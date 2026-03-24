@@ -23,6 +23,12 @@ vi.mock("react-router-dom", async () => {
 })
 
 describe("Login page", () => {
+  const getInputByName = (name) => {
+    const el = document.querySelector(`input[name="${name}"]`)
+    expect(el).toBeTruthy()
+    return el
+  }
+
   beforeEach(() => {
     vi.clearAllMocks()
     localStorage.clear()
@@ -42,10 +48,10 @@ describe("Login page", () => {
       </MemoryRouter>
     )
 
-    fireEvent.change(screen.getByPlaceholderText("Username"), {
+    fireEvent.change(getInputByName("username"), {
       target: { value: "marie" },
     })
-    fireEvent.change(screen.getByPlaceholderText("Password"), {
+    fireEvent.change(getInputByName("password"), {
       target: { value: "Pass1234" },
     })
     fireEvent.click(screen.getByRole("button", { name: "Login" }))
@@ -72,10 +78,10 @@ describe("Login page", () => {
       </MemoryRouter>
     )
 
-    fireEvent.change(screen.getByPlaceholderText("Username"), {
+    fireEvent.change(getInputByName("username"), {
       target: { value: "marie" },
     })
-    fireEvent.change(screen.getByPlaceholderText("Password"), {
+    fireEvent.change(getInputByName("password"), {
       target: { value: "Pass1234" },
     })
     fireEvent.click(screen.getByRole("button", { name: "Login" }))

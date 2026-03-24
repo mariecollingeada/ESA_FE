@@ -19,6 +19,12 @@ vi.mock("react-router-dom", async () => {
 })
 
 describe("Register page", () => {
+  const getInputByName = (name) => {
+    const el = document.querySelector(`input[name="${name}"]`)
+    expect(el).toBeTruthy()
+    return el
+  }
+
   beforeEach(() => {
     vi.clearAllMocks()
   })
@@ -34,16 +40,16 @@ describe("Register page", () => {
       </MemoryRouter>
     )
 
-    fireEvent.change(screen.getByPlaceholderText("Username"), {
+    fireEvent.change(getInputByName("username"), {
       target: { value: "marie" },
     })
-    fireEvent.change(screen.getByPlaceholderText("Email"), {
+    fireEvent.change(getInputByName("email"), {
       target: { value: "marie@example.com" },
     })
-    fireEvent.change(screen.getByPlaceholderText("Password"), {
+    fireEvent.change(getInputByName("password"), {
       target: { value: "Pass1234" },
     })
-    fireEvent.change(screen.getByPlaceholderText("Confirm Password"), {
+    fireEvent.change(getInputByName("confirmPassword"), {
       target: { value: "Pass1234" },
     })
 
@@ -73,16 +79,16 @@ describe("Register page", () => {
       </MemoryRouter>
     )
 
-    fireEvent.change(screen.getByPlaceholderText("Username"), {
+    fireEvent.change(getInputByName("username"), {
       target: { value: "marie" },
     })
-    fireEvent.change(screen.getByPlaceholderText("Email"), {
+    fireEvent.change(getInputByName("email"), {
       target: { value: "marie@example.com" },
     })
-    fireEvent.change(screen.getByPlaceholderText("Password"), {
+    fireEvent.change(getInputByName("password"), {
       target: { value: "Pass1234" },
     })
-    fireEvent.change(screen.getByPlaceholderText("Confirm Password"), {
+    fireEvent.change(getInputByName("confirmPassword"), {
       target: { value: "Pass1234" },
     })
 

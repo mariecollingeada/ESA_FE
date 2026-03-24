@@ -57,6 +57,7 @@ Open the URL printed by Vite (usually `http://localhost:5173`).
 - `npm run test -- --run` : run tests once
 - `npm run test:ui` : open Vitest UI
 - `npm run test:coverage` : run tests with coverage
+- `npx playwright test`: run e2e tests
 
 ## Testing and Coverage
 
@@ -65,6 +66,8 @@ Coverage uses the V8 provider via Vitest.
 ```bash
 npm run test:coverage
 ```
+
+E2E tests use playwright. You must ensure that the backend is running locally in order to be able to run playwright tests against it.
 
 ### Test Breakdown Summary
 
