@@ -7,6 +7,10 @@ import {
   uploadPetImage,
   updatePet,
 } from "../api/pets"
+import {
+  getBreedOptionsForSpecies,
+  SPECIES_OPTIONS,
+} from "../constants/petOptions"
 
 const EMPTY_FORM = {
   name: "",
@@ -71,6 +75,7 @@ export default function Profile() {
   const [uploadingImage, setUploadingImage] = useState(false)
   const [error, setError] = useState(null)
   const [message, setMessage] = useState(null)
+  const [uploadError, setUploadError] = useState(null)
 
   const rawMe = localStorage.getItem("me")
   const me = rawMe ? JSON.parse(rawMe) : null
@@ -124,6 +129,7 @@ export default function Profile() {
     setSubmitting(true)
     setError(null)
     setMessage(null)
+    setUploadError(null)
 
     try {
       await createPet(mapFormToPayload(createForm))
@@ -149,6 +155,7 @@ export default function Profile() {
 
     setError(null)
     setMessage(null)
+    setUploadError(null)
     setEditingPet(false)
     setImageFile(null)
 
@@ -176,6 +183,7 @@ export default function Profile() {
     setEditingPet(true)
     setError(null)
     setMessage(null)
+    setUploadError(null)
   }
 
   const handleCancelEdit = () => {
@@ -195,6 +203,7 @@ export default function Profile() {
     setSubmitting(true)
     setError(null)
     setMessage(null)
+    setUploadError(null)
 
     try {
       const res = await updatePet(id, mapFormToPayload(editForm))
@@ -225,6 +234,7 @@ export default function Profile() {
     setSubmitting(true)
     setError(null)
     setMessage(null)
+    setUploadError(null)
 
     try {
       await deletePet(id)
@@ -243,40 +253,41 @@ export default function Profile() {
     const file = e.target.files?.[0] || null
     if (!file) {
       setImageFile(null)
+      setUploadError(null)
       return
     }
 
     if (!file.type.startsWith("image/")) {
-      setError("Please select a valid image file")
+      setUploadError("Please select a valid image file")
       setImageFile(null)
       return
     }
 
     const maxBytes = 5 * 1024 * 1024
     if (file.size > maxBytes) {
-      setError("Image must be 5MB or smaller")
+      setUploadError("Image must be 5MB or smaller")
       setImageFile(null)
       return
     }
 
-    setError(null)
+    setUploadError(null)
     setImageFile(file)
   }
 
   const handleUploadImage = async () => {
     const id = getPetId(selectedPet)
     if (!id) {
-      setError("Selected pet has no id and cannot be updated")
+      setUploadError("Selected pet has no id and cannot be updated")
       return
     }
 
     if (!imageFile) {
-      setError("Please select an image first")
+      setUploadError("Please select an image first")
       return
     }
 
     setUploadingImage(true)
-    setError(null)
+    setUploadError(null)
     setMessage(null)
 
     try {
@@ -284,13 +295,17 @@ export default function Profile() {
       setSelectedPet(res.data || selectedPet)
       setMessage("Pet image updated successfully")
       setImageFile(null)
+      setUploadError(null)
       await loadMyPets()
     } catch (err) {
-      setError(formatApiError(err, "Failed to upload pet image"))
+      setUploadError(formatApiError(err, "Failed to upload pet image"))
     } finally {
       setUploadingImage(false)
     }
   }
+
+  const createBreedOptions = getBreedOptionsForSpecies(createForm.species)
+  const editBreedOptions = getBreedOptionsForSpecies(editForm.species)
 
   return (
     <div className="profile-layout">
@@ -352,24 +367,45 @@ export default function Profile() {
               }
             />
             <label htmlFor="profile-create-pet-species">Species</label>
-            <input
+            <select
               id="profile-create-pet-species"
               name="Species"
               required
               value={createForm.species}
-              onChange={(e) =>
-                setCreateForm({ ...createForm, species: e.target.value })
-              }
-            />
+              onChange={(e) => {
+                const nextSpecies = e.target.value
+                const validBreeds = getBreedOptionsForSpecies(nextSpecies)
+                setCreateForm((prev) => ({
+                  ...prev,
+                  species: nextSpecies,
+                  breed: validBreeds.includes(prev.breed) ? prev.breed : "",
+                }))
+              }}
+            >
+              <option value="">Select species</option>
+              {SPECIES_OPTIONS.map((species) => (
+                <option key={species} value={species}>
+                  {species}
+                </option>
+              ))}
+            </select>
             <label htmlFor="profile-create-pet-breed">Breed</label>
-            <input
+            <select
               id="profile-create-pet-breed"
               name="Breed"
               value={createForm.breed}
               onChange={(e) =>
                 setCreateForm({ ...createForm, breed: e.target.value })
               }
-            />
+              disabled={!createForm.species}
+            >
+              <option value="">Select breed</option>
+              {createBreedOptions.map((breed) => (
+                <option key={breed} value={breed}>
+                  {breed}
+                </option>
+              ))}
+            </select>
             <label htmlFor="profile-create-pet-age">Age</label>
             <input
               id="profile-create-pet-age"
@@ -479,6 +515,11 @@ export default function Profile() {
                       {uploadingImage ? "Uploading..." : "Upload Image"}
                     </button>
                   </div>
+                  {uploadError && (
+                    <p className="upload-error" role="alert">
+                      {uploadError}
+                    </p>
+                  )}
                   <button
                     type="button"
                     onClick={handleStartEdit}
@@ -507,24 +548,43 @@ export default function Profile() {
                     }
                   />
                   <label htmlFor="profile-edit-pet-species">Species</label>
-                  <input
+                  <select
                     id="profile-edit-pet-species"
-                    placeholder="Species"
                     required
                     value={editForm.species}
-                    onChange={(e) =>
-                      setEditForm({ ...editForm, species: e.target.value })
-                    }
-                  />
+                    onChange={(e) => {
+                      const nextSpecies = e.target.value
+                      const validBreeds = getBreedOptionsForSpecies(nextSpecies)
+                      setEditForm((prev) => ({
+                        ...prev,
+                        species: nextSpecies,
+                        breed: validBreeds.includes(prev.breed) ? prev.breed : "",
+                      }))
+                    }}
+                  >
+                    <option value="">Select species</option>
+                    {SPECIES_OPTIONS.map((species) => (
+                      <option key={species} value={species}>
+                        {species}
+                      </option>
+                    ))}
+                  </select>
                   <label htmlFor="profile-edit-pet-breed">Breed</label>
-                  <input
+                  <select
                     id="profile-edit-pet-breed"
-                    placeholder="Breed"
                     value={editForm.breed}
                     onChange={(e) =>
                       setEditForm({ ...editForm, breed: e.target.value })
                     }
-                  />
+                    disabled={!editForm.species}
+                  >
+                    <option value="">Select breed</option>
+                    {editBreedOptions.map((breed) => (
+                      <option key={breed} value={breed}>
+                        {breed}
+                      </option>
+                    ))}
+                  </select>
                   <label htmlFor="profile-edit-pet-age">Age</label>
                   <input
                     id="profile-edit-pet-age"

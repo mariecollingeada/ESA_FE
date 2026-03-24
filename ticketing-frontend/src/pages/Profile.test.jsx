@@ -20,7 +20,9 @@ vi.mock("../api/pets", () => ({
 
 describe("Profile page", () => {
   const getInputByName = (name) => {
-    const el = document.querySelector(`input[name="${name}"]`)
+    const el = document.querySelector(
+      `input[name="${name}"], select[name="${name}"], textarea[name="${name}"]`
+    )
     expect(el).toBeTruthy()
     return el
   }
@@ -228,13 +230,13 @@ describe("Profile page", () => {
 
   it("updates pet successfully", async () => {
     mockGetMyPets.mockResolvedValue({
-      data: [{ id: 12, name: "Mochi", species: "Cat", breed: "Tabby" }],
+      data: [{ id: 12, name: "Mochi", species: "Cat", breed: "Siamese" }],
     })
     mockGetPetById.mockResolvedValue({
-      data: { id: 12, name: "Mochi", species: "Cat", breed: "Tabby" },
+      data: { id: 12, name: "Mochi", species: "Cat", breed: "Siamese" },
     })
     mockUpdatePet.mockResolvedValue({
-      data: { id: 12, name: "Mochi", species: "Cat", breed: "British" },
+      data: { id: 12, name: "Mochi", species: "Cat", breed: "Siamese" },
     })
 
     render(<Profile />)
@@ -243,8 +245,8 @@ describe("Profile page", () => {
     fireEvent.click(await screen.findByRole("button", { name: /Mochi/i }))
     fireEvent.click(await screen.findByRole("button", { name: "Edit Pet" }))
 
-    fireEvent.change(screen.getByPlaceholderText("Breed"), {
-      target: { value: "British" },
+    fireEvent.change(document.querySelector("#profile-edit-pet-breed"), {
+      target: { value: "Siamese" },
     })
     fireEvent.click(screen.getByRole("button", { name: "Save Changes" }))
 
@@ -254,7 +256,7 @@ describe("Profile page", () => {
         expect.objectContaining({
           name: "Mochi",
           species: "Cat",
-          breed: "British",
+          breed: "Siamese",
         })
       )
     })

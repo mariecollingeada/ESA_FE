@@ -18,7 +18,9 @@ vi.mock("../api/pets", () => ({
 
 describe("Pets page", () => {
   const getInputByName = (name) => {
-    const el = document.querySelector(`input[name="${name}"]`)
+    const el = document.querySelector(
+      `input[name="${name}"], select[name="${name}"], textarea[name="${name}"]`
+    )
     expect(el).toBeTruthy()
     return el
   }

@@ -87,8 +87,8 @@ test('user can register, login, and create a pet', async ({ page }) => {
 
   // Fill pet form
   await page.locator('input[name="Name"]').fill('Buddy');
-  await page.locator('input[name="Species"]').fill('Dog');
-  await page.locator('input[name="Breed"]').fill('Labrador');
+  await page.locator('select[name="Species"]').selectOption('Dog');
+  await page.locator('select[name="Breed"]').selectOption('Labrador');
   await page.locator('input[name="Age"]').fill('3');
 
   const descriptionInput = page.locator('textarea[name="Description"], input[name="Description"]');

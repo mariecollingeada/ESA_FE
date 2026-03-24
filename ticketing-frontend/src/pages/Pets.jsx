@@ -6,6 +6,10 @@ import {
   getMyPets,
   updatePet,
 } from "../api/pets"
+import {
+  getBreedOptionsForSpecies,
+  SPECIES_OPTIONS,
+} from "../constants/petOptions"
 
 const EMPTY_FORM = {
   name: "",
@@ -116,6 +120,9 @@ export default function Pets() {
     setEditForm(EMPTY_FORM)
   }
 
+  const createBreedOptions = getBreedOptionsForSpecies(createForm.species)
+  const editBreedOptions = getBreedOptionsForSpecies(editForm.species)
+
   const handleCreate = async (e) => {
     e.preventDefault()
     setSubmitting(true)
@@ -205,24 +212,45 @@ export default function Pets() {
             }
           />
           <label htmlFor="create-pet-species">Species</label>
-          <input
+          <select
             id="create-pet-species"
             name="species"
             required
             value={createForm.species}
-            onChange={(e) =>
-              setCreateForm({ ...createForm, species: e.target.value })
-            }
-          />
+            onChange={(e) => {
+              const nextSpecies = e.target.value
+              const validBreeds = getBreedOptionsForSpecies(nextSpecies)
+              setCreateForm((prev) => ({
+                ...prev,
+                species: nextSpecies,
+                breed: validBreeds.includes(prev.breed) ? prev.breed : "",
+              }))
+            }}
+          >
+            <option value="">Select species</option>
+            {SPECIES_OPTIONS.map((species) => (
+              <option key={species} value={species}>
+                {species}
+              </option>
+            ))}
+          </select>
           <label htmlFor="create-pet-breed">Breed</label>
-          <input
+          <select
             id="create-pet-breed"
             name="breed"
             value={createForm.breed}
             onChange={(e) =>
               setCreateForm({ ...createForm, breed: e.target.value })
             }
-          />
+            disabled={!createForm.species}
+          >
+            <option value="">Select breed</option>
+            {createBreedOptions.map((breed) => (
+              <option key={breed} value={breed}>
+                {breed}
+              </option>
+            ))}
+          </select>
           <label htmlFor="create-pet-age">Age</label>
           <input
             id="create-pet-age"
@@ -263,22 +291,43 @@ export default function Pets() {
               onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
             />
             <label htmlFor="edit-pet-species">Species</label>
-            <input
+            <select
               id="edit-pet-species"
               name="species"
               required
               value={editForm.species}
-              onChange={(e) =>
-                setEditForm({ ...editForm, species: e.target.value })
-              }
-            />
+              onChange={(e) => {
+                const nextSpecies = e.target.value
+                const validBreeds = getBreedOptionsForSpecies(nextSpecies)
+                setEditForm((prev) => ({
+                  ...prev,
+                  species: nextSpecies,
+                  breed: validBreeds.includes(prev.breed) ? prev.breed : "",
+                }))
+              }}
+            >
+              <option value="">Select species</option>
+              {SPECIES_OPTIONS.map((species) => (
+                <option key={species} value={species}>
+                  {species}
+                </option>
+              ))}
+            </select>
             <label htmlFor="edit-pet-breed">Breed</label>
-            <input
+            <select
               id="edit-pet-breed"
               name="breed"
               value={editForm.breed}
               onChange={(e) => setEditForm({ ...editForm, breed: e.target.value })}
-            />
+              disabled={!editForm.species}
+            >
+              <option value="">Select breed</option>
+              {editBreedOptions.map((breed) => (
+                <option key={breed} value={breed}>
+                  {breed}
+                </option>
+              ))}
+            </select>
             <label htmlFor="edit-pet-age">Age</label>
             <input
               id="edit-pet-age"
