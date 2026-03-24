@@ -23,6 +23,17 @@ jobs:
           node-version: 20
           cache: 'npm'
           cache-dependency-path: package-lock.json
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Configure npm auth
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          JFROG_TOKEN: ${{ secrets.JFROG_NPM_TOKEN }}
+        run: |
+          npm config set //registry.npmjs.org/:_authToken "$NODE_AUTH_TOKEN"
+          if [ -n "$JFROG_TOKEN" ]; then
+            npm config set //msmg.jfrog.io/artifactory/api/npm/main-npm/:_authToken "$JFROG_TOKEN"
+          fi
 
       - name: Install dependencies
         run: npm ci
